@@ -27,36 +27,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        String header = request.getHeader("Authorization");
 
-        String header;
-        String token;
-        String username;
-
-        header = request.getHeader("Authorization");
-
-        if(header == null || !header.startsWith("Bearer ")) {
+        if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
-        token = header.substring(7);
+
+        String token = header.substring(7);
+
         try {
-            username = jwtService.getUsernameFromToken(token);
+            String username = jwtService.getUsernameFromToken(token);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (userDetails != null && jwtService.isTokenExpired(token)) {
+                if (userDetails != null && !jwtService.isTokenExpired(token)) {
                     UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities());
+
                     authentication.setDetails(userDetails);
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
         } catch (ExpiredJwtException e) {
-            System.out.println("Token Süresi Doldu : " + e.getHeader());
-        }catch (Exception e) {
+            System.out.println("Token süresi dolmuştur : " + e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // İsteğe bağlı: 401 döndür
+            return;
+        } catch (Exception e) {
             System.out.println("Genel bir hata oluştu : " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);
     }
+
 }

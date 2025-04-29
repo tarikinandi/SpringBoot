@@ -1,4 +1,4 @@
-package com.tarikinandi.jwt;
+package com.tarikinandi.DTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthResponse {
-    private String accessToken;
-    private String refreshToken;
+public class DepartmentDTO {
+
+    private Long id;
+    private String name;
+    private String location;
 }

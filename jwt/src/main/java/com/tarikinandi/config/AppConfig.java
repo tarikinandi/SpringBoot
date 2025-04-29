@@ -23,21 +23,22 @@ public class AppConfig {
     private UserRepository userRepository;
 
     @Bean
-    public UserDetailsService userDetailsService(){
+    public UserDetailsService userDetailsService() {
         return new UserDetailsService() {
+
             @Override
             public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-              Optional<User> optional = userRepository.findByUsername(username);
-              if (optional.isPresent()){
-                  return optional.get();
-              }
-              return null;
+                Optional<User> optional = 	userRepository.findByUsername(username);
+                if(optional.isPresent()) {
+                    return optional.get();
+                }
+                return null;
             }
         };
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(){
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService());
         authenticationProvider.setPasswordEncoder(passwordEncoder());
@@ -50,8 +51,9 @@ public class AppConfig {
         return configuration.getAuthenticationManager();
     }
 
+
     @Bean
-    public BCryptPasswordEncoder passwordEncoder(){
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }
