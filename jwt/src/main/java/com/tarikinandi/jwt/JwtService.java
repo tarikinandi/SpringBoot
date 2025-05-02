@@ -61,7 +61,7 @@ public class JwtService {
 
     public boolean isTokenExpired(String token) {
         Date expiration = exportToken(token, Claims::getExpiration);
-        return new Date().before(expiration);
+        return expiration.before(new Date());
     }
 
     public Key getKey() {

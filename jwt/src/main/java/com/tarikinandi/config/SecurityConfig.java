@@ -1,5 +1,6 @@
 package com.tarikinandi.config;
 
+import com.tarikinandi.jwt.AuthEntryPoint;
 import com.tarikinandi.jwt.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -24,10 +25,16 @@ public class SecurityConfig {
     private AuthenticationProvider authenticationProvider;
 
     @Autowired
-    private AuthenticationEntryPoint authenticationEntryPoint;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private AuthEntryPoint authEntryPoint;
+
+    private static final String[] SWAGGER_PATHS = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/swagger-ui.html"
+    };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -35,9 +42,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         request -> request.requestMatchers(AUTHENTICATE , REGISTER , REFRESH_TOKEN)
                                 .permitAll()
+                                .requestMatchers(SWAGGER_PATHS).permitAll()
                                 .anyRequest()
                                 .authenticated())
-                                .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
+                                .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint))
                                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authenticationProvider(authenticationProvider)
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
